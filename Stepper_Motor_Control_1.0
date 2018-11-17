@@ -1,0 +1,73 @@
+
+/*
+ Stepper Motor Control - one revolution
+
+ This program drives a unipolar or bipolar stepper motor.
+ The motor is attached to digital pins 8 - 11 of the Arduino.
+
+ The motor should revolve one revolution in one direction, then
+ one revolution in the other direction.
+
+
+ Created 11 Mar. 2007
+ Modified 30 Nov. 2009
+ by Tom Igoe
+
+ */
+
+#include <Stepper.h>
+
+const int stepsPerRevolution = 200;  // number of steps per revolution
+const int defSpeed = 60;  // 60 [RPM]
+const int defSerialRate = 9600; 
+const int defRotationNum = 1000;  
+String inString = "";    // string to hold input
+
+
+// initialize the stepper library on pins 8 through 11:
+Stepper myStepper(stepsPerRevolution, 8, 10, 9, 11);
+
+void setup()
+{
+  myStepper.setSpeed(defSpeed);
+  // initialize the serial port:
+  Serial.begin(defSerialRate);
+}
+
+void loop() 
+{
+    while (Serial.available() > 0) 
+    {
+        int inChar = Serial.read();
+        if ((char)inChar == '-') 
+        {
+            // convert the incoming byte to a char and add it to the string:
+            inString += "-";
+        }
+        if (isDigit(inChar)) 
+        {
+            // convert the incoming byte to a char and add it to the string:
+            inString += (char)inChar;
+        }
+        if ((char)inChar == '.') 
+        {
+            // convert the incoming byte to a char and add it to the string:
+            inString += ".";
+        }
+    
+        // if you get a newline, print the string, then the string's value:
+        if (inChar == '\n') 
+        {
+            Serial.print(inString.toDouble());
+            Serial.println(" Stepper Motor Rounds:");
+            Serial.println("  -Rotation Begin");
+            myStepper.step(defRotationNum*inString.toDouble());
+            Serial.println("  -Rotation End");
+            Serial.println("");      
+      
+            // clear the string for new input:
+            inString = "";
+         }
+    } // while (Serial.available() > 0)   
+}
+
